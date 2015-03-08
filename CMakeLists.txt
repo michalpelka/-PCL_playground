@@ -28,7 +28,7 @@ target_link_libraries (icpColor ${PCL_LIBRARIES})
 add_executable (icpI src/icpIntensity.cpp)
 target_link_libraries (icpI ${PCL_LIBRARIES})
 
-add_executable (lum src/lum.cpp)
+add_executable (lum src/lum.cpp ${DATA_FRAMEWORK_SOURCES})
 target_link_libraries (lum ${PCL_LIBRARIES})
 
 add_executable (ndtMetascan src/ndtMetascan.cpp)
@@ -56,6 +56,12 @@ target_link_libraries (datasetViewer ${PCL_LIBRARIES})
 add_executable (converter  tool/fromFramesToPcd.cpp ${DATA_FRAMEWORK_SOURCES})
 target_link_libraries (converter ${PCL_LIBRARIES})
 
+add_executable (trajectoryPlotter  tool/trajectoryPlotter.cpp ${DATA_FRAMEWORK_SOURCES})
+target_link_libraries (trajectoryPlotter ${PCL_LIBRARIES})
 
+add_executable (fromSensorToPcd  tool/fromSensorToPcd.cpp ${DATA_FRAMEWORK_SOURCES})
+target_link_libraries (fromSensorToPcd ${PCL_LIBRARIES})
 
+add_executable (elch src/elch.cpp ${DATA_FRAMEWORK_SOURCES})
+target_link_libraries (elch ${PCL_LIBRARIES})
 

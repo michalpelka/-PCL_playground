@@ -8,7 +8,7 @@ class configReader
 {
 public:
 	std::string regMethod;
-	
+	int autoCount;
 	double ndt_step_size;
 	float ndt_res;
 	int ndt_iter;
@@ -20,7 +20,7 @@ public:
     int icp_MaximumIterations;
     float icp_CorrespondenceDistance;
     float icp_RANSACOutlierRejectionThreshold;
-
+	std::string registrationMethod;
 	void readConfig(std::string cfgfn);
 };
 
