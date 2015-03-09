@@ -6,7 +6,7 @@
 #include <pcl/point_cloud.h>
 #include <Eigen\Eigen>
 dataTransformation tt;
-std::string path="C:/immData_robot/";
+std::string path="C:/pcd_hannover/";
 int convert(std::string id)
 {
 	pcl::PointCloud<pcl::PointXYZ> pc;
@@ -26,7 +26,7 @@ int convert(std::string id)
 std::string generateId( int id)
 {
 	std::stringstream ss;
-	ss<<"scan";
+	ss<<"cloud_0";
 	if (id >=0 && id <10)
 	{
 		ss<<"00"<<id;
@@ -45,7 +45,7 @@ std::string generateId( int id)
 }
 int main()
 {
-for (int i=0; i< 100; i++)
+for (int i=0; i< 200; i++)
 {
 	convert(generateId(i));
 }

@@ -1,6 +1,4 @@
 
-/* \author Radu Bogdan Rusu
- * adaptation Raphael Favier*/
 
 #include <boost/make_shared.hpp>
 #include <pcl/point_types.h>
@@ -187,13 +185,8 @@ int main (int argc, char** argv)
 	  p.addText("...",10, i*15, 10,0,1,0, ss.str());
   }
   msg.resize(25);
-  currentlyRegisteredPc = pcl::PointCloud<PointT>::Ptr(new pcl::PointCloud<PointT>);
-  pcl::console::parse_argument (argc, argv, "-i", iter);
-  pcl::console::parse_argument (argc, argv, "-r", ndt_res);
-  pcl::console::parse_argument (argc, argv, "-s", step_size);
-  pcl::console::parse_argument (argc, argv, "-t", trans_eps);
-  pcl::console::parse_argument (argc, argv, "-f", filter_res);
-  pcl::console::parse_argument (argc, argv, "--help", display_help);
+  currentlyRegisteredPc = pcl::PointCloud<PointT>::Ptr(new pcl::PointCloud<PointT>);;
+
   // adding to metascan
   std::vector<int> p_file_indices;
   p_file_indices = pcl::console::parse_file_extension_argument (argc, argv, ".pcd");

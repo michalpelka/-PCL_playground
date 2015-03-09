@@ -14,7 +14,7 @@ public:
 	int ndt_iter;
 	double ndt_trans_eps;
 	
-	
+	bool usingMetascan;
 	float ipc_radius;
 	
     int icp_MaximumIterations;

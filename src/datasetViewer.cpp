@@ -16,6 +16,18 @@ std::vector<std::string> pcsName;
 int currentlyHighlitedScan =0;
 void keyboardEventOccurred (const pcl::visualization::KeyboardEvent &event, void* viewer_void)
 {
+	if ((event.getKeySym()=="l") && event.keyUp())
+	{
+		std::cout << "will save metascan\n";
+		pcl::PointCloud<PointT>::Ptr metascan (new pcl::PointCloud<PointT>);
+		for (int i=0; i < pcs.size(); i++)
+		{
+			*metascan+=*pcs[i];
+		}
+		pcl::io::savePCDFile("metascan.pcd",*metascan);
+
+	}
+
 	if (event.getKeySym()=="2" && event.keyUp())
 	{
 		std::cout <<" will show all scans in one colors\n";
@@ -67,17 +79,7 @@ void keyboardEventOccurred (const pcl::visualization::KeyboardEvent &event, void
 				p.addPointCloud(pcs[i], pcsName[i]);
 			}
 		}
-		if ((event.getKeySym()=="m") && event.keyUp())
-		{
-			std::cout << "will save metascan\n";
-			pcl::PointCloud<PointT>::Ptr metascan (new pcl::PointCloud<PointT>);
-			for (int i=0; i < pcs.size(); i++)
-			{
-				*metascan+=*pcs[i];
-			}
-			pcl::io::savePCDFile("metascan.pcd",*metascan);
 
-		}
 		p.updateCamera ();
 	}
 
@@ -102,8 +104,7 @@ int main (int argc, char** argv)
 		return -1;
 	}
 	std::string model_file = argv[1];
-	std::string pcd_path = "";
-	if (argc == 3) pcd_path = argv[2];
+	
 
 	p.setWindowName(model_file);
 	dataTransformation dSets;
@@ -123,13 +124,14 @@ int main (int argc, char** argv)
 		pcl::PointCloud<PointT>::Ptr pc (new pcl::PointCloud<PointT>);
 		std::string fn;
 		Eigen::Matrix4f transform;
-		bool isOkFn = dSets.getPointcloudName(indices[i], fn);
+		fn = dSets.getFullPathOfPointcloud(indices[i]);
 		bool isOkTr = dSets.getAffine(indices[i], transform);
-		if (isOkFn && isOkTr)
+		if (isOkTr)
 		{
 			std::cout <<"============\n";
-			std::cout <<"adding pc "<< indices[i]<<"\n";
-			std::cout <<"with transform \n"<< transform<<"\n";
+			std::cout <<"adding pc     :"<< indices[i]<<"\n";
+			std::cout <<"filen name    :"<<fn <<"\n";
+			std::cout <<"with transform: \n"<< transform<<"\n";
 			pcl::io::loadPCDFile<PointT>(fn, *pc);
 			pc->sensor_origin_ = Eigen::Vector4f(0,0,0,0);
 			pc->sensor_orientation_ = Eigen::Quaternionf::Identity();

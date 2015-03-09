@@ -21,6 +21,16 @@ void configReader::readConfig(std::string cfgfn)
 		autoCount = pt.get<int>("registration.toReg");
 
 	}
+
+    catch (...)
+    {
+
+    }
+	try {
+		usingMetascan = pt.get<bool>("registration.metascan");
+
+	}
+
     catch (...)
     {
 

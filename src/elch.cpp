@@ -73,9 +73,11 @@ loopDetection (int end, const CloudVector &clouds, double dist, int &first, int 
       }
     }
   }
-  //std::cout << "min_dist: " << min_dist << " state: " << state << " first: " << first << " end: " << end << std::endl;
+  std::cout << "JJ min_dist: " << min_dist << " state: " << state << " first: " << first << " end: " << end << "int (clouds.size ()) - 1)"<<  int (clouds.size ()) - 1 << std::endl;
   if (min_dist > 0 && (state < 2 || end == int (clouds.size ()) - 1)) //TODO
   {
+	 std::cout << " min_dist: " << min_dist << " state: " << state << " first: " << first << " end: " << end << "int (clouds.size ()) - 1)"<<  int (clouds.size ()) - 1 << std::endl;
+
     min_dist = -1;
     return true;
   }
@@ -101,7 +103,7 @@ main (int argc, char **argv)
   icp->setRANSACOutlierRejectionThreshold (rans);
   elch.setReg (icp);
 
-  model.loadFile("modelRegICP.xml");
+  model.loadFile(argv[1]);
   model.getAllScansId(cloudIds);
   CloudVector clouds;
   std::vector<CloudPtr> cloudsBeforeELCH;
@@ -145,8 +147,8 @@ main (int argc, char **argv)
 	
     std::string result_filename (clouds[i].first);
     result_filename = result_filename.substr (result_filename.rfind ("/") + 1);
-    pcl::io::savePCDFileBinary ("elch"+result_filename+".pcd", *(clouds[i].second));
-    std::cout << "saving result to " << "elch"+result_filename<< std::endl;
+  //  pcl::io::savePCDFileBinary ("elch"+result_filename+".pcd", *(clouds[i].second));
+ //   std::cout << "saving result to " << "elch"+result_filename<< std::endl;
 
   }
 
@@ -155,8 +157,8 @@ main (int argc, char **argv)
 	
     std::string result_filename (clouds[i].first);
     result_filename = result_filename.substr (result_filename.rfind ("/") + 1);
-    pcl::io::savePCDFileBinary ("elch"+result_filename+".pcd", *(clouds[i].second));
-    std::cout << "saving result to " << "elch"+result_filename<< std::endl;
+   // pcl::io::savePCDFileBinary ("elch"+result_filename+".pcd", *(clouds[i].second));
+   // std::cout << "saving result to " << "elch"+result_filename<< std::endl;
 	/// compute transformation
 	Eigen::Matrix4f tr;
 	Eigen::Matrix4f tr2;

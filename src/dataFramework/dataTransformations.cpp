@@ -4,9 +4,12 @@
 
 	bool dataTransformation::loadFile(std::string fn)
 	{
+
 		pt_.clear();
 		bool ret = false;
+		xmlPath = boost::filesystem::path(fn);
 		boost::property_tree::read_xml(fn, pt_);
+		
 		ret = true;
 		return ret;
 	}
@@ -14,6 +17,7 @@
 	bool dataTransformation::saveFile(std::string fn)
 	{
 		boost::property_tree::write_xml(fn, pt_, std::locale(), boost::property_tree::xml_writer_make_settings<boost::property_tree::ptree::key_type>(' ', 1u));
+		xmlPath = boost::filesystem::path(fn);
 		return true;
 	}
 	
@@ -162,6 +166,55 @@
 			ids.push_back(v.first);
 		}
 
+	}
+
+	void dataTransformation::setAlgorithmName(std::string name)
+	{
+		pt_.put("Model.Algorithms.name", name);
+	}
+	
+	void dataTransformation::addAlgorithmParam(std::string paramName, float paramValue)
+	{
+		pt_.put<float>("Model.Algorithms.params."+paramName, paramValue);
+	}
+
+	void dataTransformation::addAlgorithmParam(std::string paramName, std::string paramValue)
+	{
+		pt_.put("Model.Algorithms.params."+paramName, paramValue);
+	}
+
+	void dataTransformation::setResult(std::string scanId, std::string resultName, float result)
+	{
+		pt_.put<float>("Model.Algorithms.results."+scanId+"."+resultName, result);
+	}
+	void setResult(std::string scanId, std::string resultName, std::string result);
+
+	
+	void dataTransformation::setDataSetPath(std::string path)
+	{
+		pt_.put("Model.DatasetPath", path);
+	}
+	void dataTransformation::getDataSetPath(std::string &path)
+	{
+		try {
+			path  = pt_.get<std::string>("Model.DatasetPath");
+		}
+		catch (...)
+		{
+			path ="";
+		}
+	}
+	std::string dataTransformation::getFullPathOfPointcloud(std::string id)
+	{
+		std::string dataPath;
+		getDataSetPath(dataPath);
+		std::string fileName;
+		getPointcloudName(id, fileName);
+
+		boost::filesystem::path t =  boost::filesystem::complete(xmlPath).parent_path();
+		t/=boost::filesystem::path(dataPath);
+		t/=fileName;
+		return t.string();
 	}
 	//void dataTransformation::setAffine (std::string scanId, Eigen::Vec3f &origin, Eigen::Vec3f &quat);
 	//void dataTransformation::setPointcloudName (std::string scanId, std::string &fn);

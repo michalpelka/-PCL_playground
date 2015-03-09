@@ -1,6 +1,4 @@
 
-/* \author Radu Bogdan Rusu
- * adaptation Raphael Favier*/
 
 #include <boost/make_shared.hpp>
 #include <pcl/point_types.h>
@@ -23,12 +21,7 @@
 #include "dataFramework\dataTransformations.hpp"
 #include "viewerlog.hpp"
 #include "dataFramework\dataTransformations.hpp"
-bool display_help = false;
-float filter_res = 0.2f;
-double step_size = 0.1;
-float ndt_res = 1.0f;
-int iter = 35;
-double trans_eps = 0.01;
+
 
 using pcl::visualization::PointCloudColorHandlerGenericField;
 using pcl::visualization::PointCloudColorHandlerCustom;
@@ -40,7 +33,7 @@ typedef pcl::PointNormal PointNormalT;
 typedef pcl::PointCloud<PointNormalT> PointCloudWithNormals;
 dataTransformation inputXML;
 dataTransformation outputXML;
- std::vector<std::string> indices;
+std::vector<std::string> indices;
 
 pcl::PointCloud<PointT> metascan;
 std::vector<std::string> pcNames;
@@ -51,37 +44,39 @@ Eigen::Affine3f lastFit;
 Eigen::Affine3f currentFitCandidate;
 Eigen::Affine3f currentlyAssignedGlobalOdom;
 Eigen::Affine3f currentInitialFit;
+
 std::string currentFileName;
-  std::string outputXMLFn;
+std::string outputXMLFn;
 
 int currentPointcloud =0;
 pcl::PointCloud<PointT>::Ptr currentlyRegisteredPc;
 bool registration_accepted = false;
 configReader myCFG;
 std::vector<std::string> msg;
-
-bool registerICP(pcl::PointCloud<PointT> &metascan, pcl::PointCloud<PointT> &scan, Eigen::Affine3f &metascanToScan)
+bool isUseMetascan;
+bool registerICP(pcl::PointCloud<PointT> &metascan, pcl::PointCloud<PointT> &scan, Eigen::Affine3f &metascanToScan, std::string cloudId)
 {
 	std::cout <<"invoking ICP\n";
-	
-    pcl::IterativeClosestPoint<PointT, PointT> *icp;
 
-    icp = new pcl::IterativeClosestPoint<PointT, PointT>();
+	pcl::IterativeClosestPoint<PointT, PointT> *icp;
+	icp = new pcl::IterativeClosestPoint<PointT, PointT>();
 
-    icp->setMaximumIterations (200);
-    icp->setMaxCorrespondenceDistance (1.0);
-    icp->setRANSACOutlierRejectionThreshold (0.1);
+	icp->setMaximumIterations (myCFG.icp_MaximumIterations);
+	icp->setMaxCorrespondenceDistance (myCFG.icp_CorrespondenceDistance);
+	icp->setRANSACOutlierRejectionThreshold (myCFG.icp_RANSACOutlierRejectionThreshold);
 
-    //icp->setInputTarget (model);
+	//icp->setInputTarget (model);
 	icp->setInputTarget (metascan.makeShared());
-    icp->setInputSource (scan.makeShared());
+	icp->setInputSource (scan.makeShared());
 
-    pcl::PointCloud<PointT>::Ptr tmp (new pcl::PointCloud<PointT>);
-    icp->align (*tmp);
+	pcl::PointCloud<PointT>::Ptr tmp (new pcl::PointCloud<PointT>);
+	icp->align (*tmp);
 	std::cout << icp->getFinalTransformation () << std::endl;
 	metascanToScan = icp->getFinalTransformation();
+	outputXML.setResult(cloudId, "FitnessScore", icp->getFitnessScore());
+
 }
-bool registerNDT(pcl::PointCloud<PointT> &metascan, pcl::PointCloud<PointT> &scan, Eigen::Affine3f &metascanToScan)
+bool registerNDT(pcl::PointCloud<PointT> &metascan, pcl::PointCloud<PointT> &scan, Eigen::Affine3f &metascanToScan, std::string cloudId)
 {
 	std::cout <<"invoking NDT\n";
 	pcl::NormalDistributionsTransform<PointT, PointT> * ndt = new pcl::NormalDistributionsTransform<PointT, PointT>();
@@ -93,75 +88,87 @@ bool registerNDT(pcl::PointCloud<PointT> &metascan, pcl::PointCloud<PointT> &sca
 	ndt->setInputTarget (metascan.makeShared());
 	ndt->setInputSource (scan.makeShared());
 	pcl::PointCloud<PointT>::Ptr tmp (new pcl::PointCloud<PointT>);
-    ndt->align (*tmp);
-	
-    std::cout << ndt->getFinalTransformation () << std::endl;
+	ndt->align (*tmp);
+
+	std::cout << ndt->getFinalTransformation () << std::endl;
 	metascanToScan = ndt->getFinalTransformation();
+	outputXML.setResult(cloudId, "FitnessScore", ndt->getFitnessScore());
 }
 
 void loadNextPc()
 {
-		currentPointcloud++;
-		if (currentPointcloud < indices.size())
-		{
+	currentPointcloud++;
+	if (currentPointcloud < indices.size())
+	{
 
-			std::cout << "loading pointcloud "<<indices[currentPointcloud]<<"\n";
+		std::cout << "loading pointcloud "<<indices[currentPointcloud]<<"\n";
 
-			inputXML.getPointcloudName(indices[currentPointcloud],currentFileName);	
-			currentlyRegisteredPc = pcl::PointCloud<PointT>::Ptr(new pcl::PointCloud<PointT>);
-			pcl::io::loadPCDFile(currentFileName, *currentlyRegisteredPc);
-			
-			currentlyAssignedGlobalOdom.setIdentity();
-			inputXML.getAffine(indices[currentPointcloud],currentlyAssignedGlobalOdom.matrix()),
+		//inputXML.getPointcloudName(indices[currentPointcloud],currentFileName);	
+		
+		currentFileName= inputXML.getFullPathOfPointcloud(indices[currentPointcloud]);
+		currentlyRegisteredPc = pcl::PointCloud<PointT>::Ptr(new pcl::PointCloud<PointT>);
+
+		pcl::io::loadPCDFile(currentFileName, *currentlyRegisteredPc);
+
+		currentlyAssignedGlobalOdom.setIdentity();
+		inputXML.getAffine(indices[currentPointcloud],currentlyAssignedGlobalOdom.matrix()),
 
 			currentlyRegisteredPc->sensor_origin_ = Eigen::Vector4f(0,0,0,0);
-			currentlyRegisteredPc->sensor_orientation_ = Eigen::Quaternionf::Identity();
+		currentlyRegisteredPc->sensor_orientation_ = Eigen::Quaternionf::Identity();
 
-			Eigen::Affine3f odometryIncrement = lastGlobalOdom.inverse()*currentlyAssignedGlobalOdom;
-			std::cout << "odometry increment:\n";
-			std::cout<< odometryIncrement.matrix()<<"\n";
-			currentInitialFit = lastFit * odometryIncrement ; 
-			pcl::transformPointCloud(*currentlyRegisteredPc,*currentlyRegisteredPc,currentInitialFit );
-			logger->addMessage("readed pc, press r to register");
-		}
-		else
-		{
-			std::cout <<"No more \n";
-			
-		}
+		Eigen::Affine3f odometryIncrement = lastGlobalOdom.inverse()*currentlyAssignedGlobalOdom;
+		std::cout << "odometry increment:\n";
+		std::cout<< odometryIncrement.matrix()<<"\n";
+		currentInitialFit = lastFit * odometryIncrement ; 
+		pcl::transformPointCloud(*currentlyRegisteredPc,*currentlyRegisteredPc,currentInitialFit );
+		logger->addMessage("readed pc, press r to register");
+	}
+	else
+	{
+		std::cout <<"No more \n";
+
+	}
 }
 void registerScan()
 {
-		Eigen::Affine3f tr;
-		registration_accepted = false;
-		//bool res = registerNDT(metascan, *currentlyRegisteredPc, tr);
-		bool res;
-		if (myCFG.registrationMethod.compare("ndt")==0)	res= registerNDT(metascan, *currentlyRegisteredPc, tr);
-		if (myCFG.registrationMethod.compare("icp")==0)	res= registerICP(metascan, *currentlyRegisteredPc, tr);
+	Eigen::Affine3f tr;
+	registration_accepted = false;
+	//bool res = registerNDT(metascan, *currentlyRegisteredPc, tr);
+	bool res;
+	if (myCFG.registrationMethod.compare("ndt")==0)	res= registerNDT(metascan, *currentlyRegisteredPc, tr ,indices[currentPointcloud]);
+	if (myCFG.registrationMethod.compare("icp")==0)	res= registerICP(metascan, *currentlyRegisteredPc, tr, indices[currentPointcloud]);
 
-		if (res)
-		{
-			pcl::transformPointCloud(*currentlyRegisteredPc,*currentlyRegisteredPc, tr);
-			currentFitCandidate =   tr * currentInitialFit;
-			logger->addMessage("registration OK, press a to accept");
-		}
-		else
-		{
-			std::cout <<"registration failed\n";
-			logger->addMessage("registration NOK, l to load next scan");
-		}
+	if (res)
+	{
+		pcl::transformPointCloud(*currentlyRegisteredPc,*currentlyRegisteredPc, tr);
+		currentFitCandidate =   tr * currentInitialFit;
+		logger->addMessage("registration OK, press a to accept");
+	}
+	else
+	{
+		std::cout <<"registration failed\n";
+		logger->addMessage("registration NOK, l to load next scan");
+	}
 }
 void accept()
 {
-		registration_accepted = true;
-		metascan += *currentlyRegisteredPc;
-		lastGlobalOdom = currentlyAssignedGlobalOdom;
-		lastFit = currentFitCandidate;
-		logger->addMessage("registration accepted");
-		outputXML.setAffine(indices[currentPointcloud], lastFit.matrix());
-		outputXML.setPointcloudName(indices[currentPointcloud], currentFileName);
-		std::cout <<"saving model to " << outputXMLFn<<"\n";
-		outputXML.saveFile(outputXMLFn);
+	registration_accepted = true;
+	if (isUseMetascan)
+	{
+		/// if metascan approach is not used metascan become last registered pc
+		metascan += *currentlyRegisteredPc;		
+	}
+	else
+	{
+		metascan = *currentlyRegisteredPc;
+	}
+	lastGlobalOdom = currentlyAssignedGlobalOdom;
+	lastFit = currentFitCandidate;
+	logger->addMessage("registration accepted");
+	outputXML.setAffine(indices[currentPointcloud], lastFit.matrix());
+	outputXML.setPointcloudName(indices[currentPointcloud], currentFileName);
+	std::cout <<"saving model to " << outputXMLFn<<"\n";
+	outputXML.saveFile(outputXMLFn);
 }
 void keyboardEventOccurred (const pcl::visualization::KeyboardEvent &event, void* viewer_void)
 {
@@ -187,57 +194,64 @@ void keyboardEventOccurred (const pcl::visualization::KeyboardEvent &event, void
 	p.removeAllPointClouds();
 	pcl::visualization::PointCloudColorHandlerCustom<PointT> metascanH(metascan.makeShared(), 0, 0, 255);
 	p.addPointCloud<PointT> (metascan.makeShared(),metascanH,"metascan" );
-	
+
 	pcl::visualization::PointCloudColorHandlerCustom<PointT> scanH(currentlyRegisteredPc, 255, 0, 0);
 	p.addPointCloud<PointT> (currentlyRegisteredPc,scanH, "scan");
 }
 
 int main (int argc, char** argv)
 {
-   std::cout <<"USAGE:\n";
-   std::cout <<argv[0]<<" parameters inputModel.xml outputModel.xml\n";
+	std::cout <<"USAGE:\n";
+	std::cout <<argv[0]<<" parameters inputModel.xml outputModel.xml\n";
 
-   if (argc != 4) return -1;
-   std::string configurationFile =  argv[1];
-   std::string inputXMLFn = argv[2];
-   outputXMLFn = argv[3];
-  
-  myCFG.readConfig(configurationFile);
-  logger =new logViewer(&p,25);
-  currentlyRegisteredPc = pcl::PointCloud<PointT>::Ptr(new pcl::PointCloud<PointT>);
-  
+	if (argc != 4) return -1;
+	std::string configurationFile =  argv[1];
+	std::string inputXMLFn = argv[2];
+	outputXMLFn = argv[3];
 
-  inputXML.loadFile(inputXMLFn);
- 
-  inputXML.getAllScansId(indices);
+	myCFG.readConfig(configurationFile);
 
-  pcl::PointCloud<PointT> tmp;
-  for (int i=0; i < indices.size(); i++)
-  {
-	std::cout <<"register :"<< indices[i]<<"\n";
-  }
-  lastGlobalOdom.setIdentity();
-  lastFit.setIdentity();
-  std::string fn;
-  inputXML.getPointcloudName(indices[0],fn),
-  pcl::io::loadPCDFile(fn,tmp);
-  
-  inputXML.getAffine(indices[0],lastGlobalOdom.matrix()),
-  
-  pcl::transformPointCloud(tmp,tmp, lastGlobalOdom);
-  lastFit = lastGlobalOdom;
-  metascan += tmp;
-  metascan.sensor_origin_ = Eigen::Vector4f(0,0,0,0);
-  metascan.sensor_orientation_ = Eigen::Quaternionf::Identity();
+	isUseMetascan = myCFG.usingMetascan;
 
-  p.registerKeyboardCallback (keyboardEventOccurred, (void*)&p);
+	std::cout <<"METASCAN "<<isUseMetascan<<"\n";
+	logger =new logViewer(&p,25);
+	currentlyRegisteredPc = pcl::PointCloud<PointT>::Ptr(new pcl::PointCloud<PointT>);
 
-  for (int i=0; i< myCFG.autoCount; i++)
-  {
-	  loadNextPc();
+
+	inputXML.loadFile(inputXMLFn);
+	inputXML.getAllScansId(indices);
+
+	//generate some data to report
+	outputXML.setAlgorithmName(myCFG.registrationMethod);
+
+	pcl::PointCloud<PointT> tmp;
+	for (int i=0; i < indices.size(); i++)
+	{
+		std::cout <<"file :"<< indices[i]<<"\n";
+	}
+	lastGlobalOdom.setIdentity();
+	lastFit.setIdentity();
+	std::string fn;
+	//inputXML.getPointcloudName(indices[0],fn),
+	fn = inputXML.getFullPathOfPointcloud(indices[0]);
+	pcl::io::loadPCDFile(fn,tmp);
+
+	inputXML.getAffine(indices[0],lastGlobalOdom.matrix()),
+
+		pcl::transformPointCloud(tmp,tmp, lastGlobalOdom);
+	lastFit = lastGlobalOdom;
+	metascan += tmp;
+	metascan.sensor_origin_ = Eigen::Vector4f(0,0,0,0);
+	metascan.sensor_orientation_ = Eigen::Quaternionf::Identity();
+
+	p.registerKeyboardCallback (keyboardEventOccurred, (void*)&p);
+
+	for (int i=0; i< myCFG.autoCount; i++)
+	{
+		loadNextPc();
 		registerScan();
 		accept();		
-  }
-  p.spin();
+	}
+	p.spin();
 }
 /* ]--- */
