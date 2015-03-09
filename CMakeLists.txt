@@ -65,3 +65,5 @@ target_link_libraries (fromSensorToPcd ${PCL_LIBRARIES})
 add_executable (elch src/elch.cpp ${DATA_FRAMEWORK_SOURCES})
 target_link_libraries (elch ${PCL_LIBRARIES})
 
+add_executable (mergePcd  tool/mergePcd.cpp ${DATA_FRAMEWORK_SOURCES})
+target_link_libraries (mergePcd ${PCL_LIBRARIES})
