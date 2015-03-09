@@ -70,3 +70,34 @@ target_link_libraries (mergePcd ${PCL_LIBRARIES})
 
 add_executable (pcdOrtho  tool/pcdOrtho.cpp ${DATA_FRAMEWORK_SOURCES})
 target_link_libraries (pcdOrtho ${PCL_LIBRARIES})
+
+
+add_executable (filtering  tool/filtering.cpp ${DATA_FRAMEWORK_SOURCES})
+target_link_libraries (filtering ${PCL_LIBRARIES
+
+add_executable (subsampling  tool/subsampling.cpp ${DATA_FRAMEWORK_SOURCES})
+target_link_libraries (subsampling ${PCL_LIBRARIES})
+
+add_executable (ndt  tool/ndt.cpp ${DATA_FRAMEWORK_SOURCES})
+target_link_libraries (ndt ${PCL_LIBRARIES})
+
+add_executable (icp_overlap_viewer  tool/icp_overlap_viewer.cpp ${DATA_FRAMEWORK_SOURCES})
+target_link_libraries (icp_overlap_viewer ${PCL_LIBRARIES})
+
+add_executable (trajectory_viewer  tool/trajectory_viewer.cpp ${DATA_FRAMEWORK_SOURCES})
+target_link_libraries (trajectory_viewer ${PCL_LIBRARIES})
+
+add_executable (elch_viewer  tool/elch_viewer.cpp ${DATA_FRAMEWORK_SOURCES})
+target_link_libraries (elch_viewer ${PCL_LIBRARIES})
+
+add_executable (graph_viewer  tool/graph_viewer.cpp ${DATA_FRAMEWORK_SOURCES})
+target_link_libraries (graph_viewer ${PCL_LIBRARIES})
+
+add_executable (model_viewer  tool/model_viewer.cpp ${DATA_FRAMEWORK_SOURCES})
+target_link_libraries (model_viewer ${PCL_LIBRARIES})
+
+add_executable (residuum_viewer  tool/residuum_viewer.cpp ${DATA_FRAMEWORK_SOURCES})
+target_link_libraries (residuum_viewer ${PCL_LIBRARIES})
+
+add_executable (histogram_error_viewer  tool/histogram_error_viewer.cpp ${DATA_FRAMEWORK_SOURCES})
+target_link_libraries (histogram_error_viewer ${PCL_LIBRARIES})
