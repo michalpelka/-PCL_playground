@@ -67,3 +67,6 @@ target_link_libraries (elch ${PCL_LIBRARIES})
 
 add_executable (mergePcd  tool/mergePcd.cpp ${DATA_FRAMEWORK_SOURCES})
 target_link_libraries (mergePcd ${PCL_LIBRARIES})
+
+add_executable (pcdOrtho  tool/pcdOrtho.cpp ${DATA_FRAMEWORK_SOURCES})
+target_link_libraries (pcdOrtho ${PCL_LIBRARIES})

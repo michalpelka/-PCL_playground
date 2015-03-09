@@ -1,3 +1,4 @@
+#include <pcl/io/png_io.h>
 #include <pcl/point_types.h>
 #include <pcl/point_cloud.h>
 #include <pcl/point_representation.h>
@@ -67,7 +68,7 @@ int main (int argc, char** argv)
 	// Check user input
 	if (data.empty ())
 	{
-		PCL_ERROR ("Syntax is: %s output.pcd input1.pcd [*]", argv[0]);
+		PCL_ERROR ("Syntax is: %s output.png input1.pcd [*]", argv[0]);
 		PCL_ERROR ("[*] - multiple files can be added. All files are merged and saved into output.pcd");
 		return (-1);
 	}
@@ -83,5 +84,5 @@ int main (int argc, char** argv)
 		}
 	}
 	PCL_INFO("Saving to: %s (size=%d)\n",argv[1],result->size());
-	pcl::io::savePCDFile (argv[1], *result, true);
+	pcl::io::savePNGFile(argv[1],*result);
 }
