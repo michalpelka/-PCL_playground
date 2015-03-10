@@ -112,7 +112,7 @@ main (int argc, char **argv)
 	std::string fn;
 	Eigen::Matrix4f tr;
 
-	model.getPointcloudName(cloudIds[i], fn);
+	fn = model.getFullPathOfPointcloud(cloudIds[i]);
 	modelAfterElch.setPointcloudName(cloudIds[i], fn);
 	model.getAffine(cloudIds[i], tr);
 
@@ -168,6 +168,9 @@ main (int argc, char **argv)
 
 	Eigen::Matrix4f fin = tr*tr2;
 	modelAfterElch.setAffine(cloudIds[i], fin);
+	std::string fn;
+	model.getPointcloudName(cloudIds[i], fn);
+	modelAfterElch.setPointcloudName(cloudIds[i], fn);
   }
   modelAfterElch.saveFile("modelELCH.xml");
   return 0;

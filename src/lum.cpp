@@ -56,7 +56,7 @@ int main (int argc, char **argv)
 		std::string fn;
 		Eigen::Matrix4f tr;
 
-		model.getPointcloudName(cloudIds[i], fn);
+		fn = model.getFullPathOfPointcloud(cloudIds[i]);
 		modelAfterLum.setPointcloudName(cloudIds[i], fn);
 		model.getAffine(cloudIds[i], tr);
 
@@ -111,6 +111,10 @@ int main (int argc, char **argv)
 
 		Eigen::Affine3f final = tr * tr2;
 		modelAfterLum.setAffine(cloudIds[i], final.matrix());
+		
+		std::string fn;
+		model.getPointcloudName(cloudIds[i], fn);
+		modelAfterLum.setPointcloudName(cloudIds[i], fn);
 	}
 	modelAfterLum.saveFile("modelLUM.xml");
 

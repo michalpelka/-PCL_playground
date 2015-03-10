@@ -12,36 +12,11 @@ add_definitions(${PCL_DEFINITIONS})
 
 
 SET(DATA_FRAMEWORK_SOURCES src/dataFramework/dataTransformations.cpp)
-add_executable (testProj src/test.cpp )
-target_link_libraries (testProj ${PCL_LIBRARIES})
-
-add_executable (testProjSIFT src/testSift.cpp )
-target_link_libraries (testProjSIFT ${PCL_LIBRARIES})
-
-add_executable (ndt3dColor src/ndt3dColor.cpp )
-target_link_libraries (ndt3dColor ${PCL_LIBRARIES})
-
-add_executable (icpColor src/icp.cpp)
-target_link_libraries (icpColor ${PCL_LIBRARIES})
-
-
-add_executable (icpI src/icpIntensity.cpp)
-target_link_libraries (icpI ${PCL_LIBRARIES})
-
 add_executable (lum src/lum.cpp ${DATA_FRAMEWORK_SOURCES})
 target_link_libraries (lum ${PCL_LIBRARIES})
 
-add_executable (ndtMetascan src/ndtMetascan.cpp)
-target_link_libraries (ndtMetascan ${PCL_LIBRARIES})
-
-add_executable (incrementalICP src/incrementalICP.cpp)
-target_link_libraries (incrementalICP ${PCL_LIBRARIES})
-
-add_executable (voxel_grid src/voxel_grid.cpp src/myICP.cpp)
+add_executable (voxel_grid src/voxel_grid.cpp ${DATA_FRAMEWORK_SOURCES})
 target_link_libraries (voxel_grid ${PCL_LIBRARIES})
-
-add_executable (incrementalNDT src/incrementalNDT.cpp)
-target_link_libraries (incrementalNDT ${PCL_LIBRARIES})
 
 add_executable (incrementalREG src/incrementalReg/incremental.cpp src/incrementalReg/viewerLog.cpp src/incrementalReg/viewerLog.hpp src/incrementalReg/configReader.cpp src/incrementalReg/configReader.hpp ${DATA_FRAMEWORK_SOURCES})
 target_link_libraries (incrementalREG ${PCL_LIBRARIES})
@@ -64,4 +39,6 @@ target_link_libraries (fromSensorToPcd ${PCL_LIBRARIES})
 
 add_executable (elch src/elch.cpp ${DATA_FRAMEWORK_SOURCES})
 target_link_libraries (elch ${PCL_LIBRARIES})
+
+
 

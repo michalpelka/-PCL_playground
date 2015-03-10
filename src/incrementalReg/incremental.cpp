@@ -166,7 +166,9 @@ void accept()
 	lastFit = currentFitCandidate;
 	logger->addMessage("registration accepted");
 	outputXML.setAffine(indices[currentPointcloud], lastFit.matrix());
-	outputXML.setPointcloudName(indices[currentPointcloud], currentFileName);
+	std::string cloud_fn;
+	inputXML.getPointcloudName(indices[currentPointcloud] ,cloud_fn);
+	outputXML.setPointcloudName(indices[currentPointcloud], cloud_fn);
 	std::cout <<"saving model to " << outputXMLFn<<"\n";
 	outputXML.saveFile(outputXMLFn);
 }
@@ -223,6 +225,10 @@ int main (int argc, char** argv)
 
 	//generate some data to report
 	outputXML.setAlgorithmName(myCFG.registrationMethod);
+	std::string dataPath;
+	inputXML.getDataSetPath(dataPath);
+	outputXML.setDataSetPath(dataPath);
+
 
 	pcl::PointCloud<PointT> tmp;
 	for (int i=0; i < indices.size(); i++)
