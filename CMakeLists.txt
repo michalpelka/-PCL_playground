@@ -73,7 +73,7 @@ target_link_libraries (pcdOrtho ${PCL_LIBRARIES})
 
 
 add_executable (filtering  tool/filtering.cpp ${DATA_FRAMEWORK_SOURCES})
-target_link_libraries (filtering ${PCL_LIBRARIES
+target_link_libraries (filtering ${PCL_LIBRARIES)
 
 add_executable (subsampling  tool/subsampling.cpp ${DATA_FRAMEWORK_SOURCES})
 target_link_libraries (subsampling ${PCL_LIBRARIES})
